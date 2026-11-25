@@ -1,0 +1,21 @@
+.intro {
+  position: fixed; inset: 0; z-index: var(--z-intro); display: grid; place-items: center; overflow: hidden; background: var(--bg);
+  transition: opacity 0.7s var(--ease-in-out), transform 0.7s var(--ease-in-out);
+}
+.intro::before { content: ''; position: absolute; inset: 0; opacity: 0; background: radial-gradient(55% 48% at 50% 46%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 72%); animation: glow 1.5s 0.15s var(--ease) forwards; }
+.beam { position: absolute; top: -25%; bottom: -25%; left: -45%; width: 38%; transform: skewX(-18deg); background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent) 20%, transparent), transparent); animation: sweep 1.6s 0.3s var(--ease-in-out) forwards; }
+.center { position: relative; display: grid; justify-items: center; gap: 1.5rem; }
+.mark { filter: drop-shadow(0 0 18px color-mix(in srgb, var(--accent) 38%, transparent)); }
+.name { font-family: var(--font-display); font-size: clamp(1.35rem, 4.2vw, 2rem); font-weight: 600; letter-spacing: 0.06em; opacity: 0; transform: translateY(10px); animation: rise 0.8s 0.85s var(--ease) forwards; }
+html[lang='bn'] .name { font-family: var(--font-body); letter-spacing: 0.02em; font-weight: 700; }
+.track { width: min(15rem, 58vw); height: 2px; overflow: hidden; border-radius: 2px; background: var(--border); opacity: 0; animation: fade 0.4s 0.6s forwards; }
+.fill { display: block; height: 100%; transform-origin: left center; transform: scaleX(var(--p, 0.06)); background: var(--gradient); transition: transform 0.5s var(--ease); }
+.skip { position: absolute; inset: auto 0 max(1.5rem, env(safe-area-inset-bottom)); margin-inline: auto; width: max-content; min-height: 2.5rem; padding: 0.3rem 1rem; border-radius: var(--radius-pill); color: var(--text-faint); font-size: 0.85rem; opacity: 0; animation: fade 0.5s 1.4s forwards; }
+.skip:hover { color: var(--text); }
+.intro[data-phase='exit'] { opacity: 0; transform: scale(1.04); pointer-events: none; }
+:global(html[data-intro='seen']) .intro { display: none; }
+@keyframes glow { to { opacity: 1; } }
+@keyframes sweep { to { transform: translateX(420%) skewX(-18deg); } }
+@keyframes rise { to { opacity: 1; transform: none; } }
+@keyframes fade { to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .intro { display: none; } }

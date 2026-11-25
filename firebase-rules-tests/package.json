@@ -1,0 +1,11 @@
+{
+  "name": "imran-portfolio-rules-tests",
+  "private": true,
+  "type": "module",
+  "description": "Security-rules tests. Kept as its own package so its Firebase peer-dependency never conflicts with the app's.",
+  "scripts": { "test": "node --test rules.test.mjs" },
+  "dependencies": {
+    "@firebase/rules-unit-testing": "^5.0.1",
+    "firebase": "^12.19.0"
+  }
+}

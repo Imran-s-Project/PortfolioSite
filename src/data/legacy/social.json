@@ -1,0 +1,51 @@
+[
+  {
+    "id": "github",
+    "name": "GitHub",
+    "handle": "imran-s-project",
+    "url": "https://github.com/imran-s-project",
+    "icon": "github"
+  },
+  {
+    "id": "facebook",
+    "name": "Facebook",
+    "handle": "techverse.eee.cse",
+    "url": "https://facebook.com/techverse.eee.cse",
+    "icon": "facebook"
+  },
+  {
+    "id": "youtube",
+    "name": "YouTube",
+    "handle": "@imran.ahmedd",
+    "url": "https://youtube.com/@imran.ahmedd",
+    "icon": "youtube"
+  },
+  {
+    "id": "instagram",
+    "name": "Instagram",
+    "handle": "imran.ahmedddddd",
+    "url": "https://instagram.com/imran.ahmedddddd",
+    "icon": "instagram"
+  },
+  {
+    "id": "x",
+    "name": "X (Twitter)",
+    "handle": "@imranahmed-bd",
+    "url": "https://x.com/imranahmed-bd",
+    "icon": "x"
+  },
+  {
+    "id": "vercel",
+    "name": "Vercel",
+    "handle": "imran-s-project",
+    "url": "https://vercel.com/imran-s-project",
+    "icon": "vercel"
+  },
+  {
+    "id": "gmail",
+    "name": "Gmail",
+    "handle": "project.developer.tech@gmail.com",
+    "url": "mailto:project.developer.tech@gmail.com",
+    "icon": "mail"
+  }
+]

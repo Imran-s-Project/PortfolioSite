@@ -1,0 +1,23 @@
+node_modules
+.next
+out
+next-env.d.ts
+*.tsbuildinfo
+# Credentials and private environment files must never be committed (.env.example holds placeholders only)
+.env
+.env.*
+!.env.example
+serviceAccount*.json
+*-firebase-adminsdk-*.json
+*.pem
+*.key
+.vercel
+.firebase
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+.DS_Store
+Thumbs.db
+# Raw footage downloads stay out of the repository (see public/nature/README.md)
+public/nature/source/*
+!public/nature/source/.gitkeep

@@ -1,0 +1,36 @@
+{
+  "name": "imran-portfolio",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Imran Ahmed — portfolio and content platform (Next.js App Router, TypeScript, Firebase)",
+  "engines": { "node": ">=20.9.0" },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test tests/*.test.ts tests/*.test.tsx",
+    "check": "npm run typecheck && npm run lint && npm run test",
+    "rules:test": "firebase emulators:exec --only firestore,storage --project demo-imran \"npm --prefix firebase-rules-tests test\"",
+    "diagnose:firestore": "tsx tools/diagnose-firestore.ts",
+    "nature:assets": "node tools/make-nature-assets.mjs"
+  },
+  "dependencies": {
+    "firebase": "^13.3.0",
+    "motion": "^12.33.0",
+    "next": "^16.4.5",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "eslint": "^9.0.0",
+    "eslint-config-next": "^16.4.5",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0"
+  }
+}

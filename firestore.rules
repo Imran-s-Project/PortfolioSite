@@ -1,0 +1,115 @@
+rules_version = '2';
+
+// Public visitors can READ published content and CREATE contact messages — nothing else.
+// Everything else requires a signed-in user who has a document in /adminProfiles/{uid} with role == 'admin'.
+// (The first admin document is created by hand in the Firebase console — see docs/FIREBASE_SETUP.md.)
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function adminPath() { return /databases/$(database)/documents/adminProfiles/$(request.auth.uid); }
+    function isAdmin() { return signedIn() && exists(adminPath()) && get(adminPath()).data.role == 'admin'; }
+    function str(v, min, max) { return v is string && v.size() >= min && v.size() <= max; }
+    function isSlug(v) { return str(v, 1, 80) && v.matches('^[a-z0-9]+(-[a-z0-9]+)*$'); }
+
+    /* ───── admins ───── */
+    match /adminProfiles/{uid} {
+      allow get: if signedIn() && (request.auth.uid == uid || isAdmin());
+      allow list: if isAdmin();
+      allow create: if isAdmin() && request.resource.data.role == 'admin';
+      allow delete: if isAdmin() && request.auth.uid != uid;
+      // admins edit anything; a user may edit only their own display fields, never their role
+      allow update: if isAdmin() && request.resource.data.role == 'admin'
+        || signedIn() && request.auth.uid == uid
+           && request.resource.data.role == resource.data.role
+           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['displayName', 'photoURL', 'updatedAt']);
+    }
+
+    /* ───── site settings (public read, admin write) ───── */
+    match /siteSettings/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    /* ───── projects: document id == slug ───── */
+    function validProject(d, slug) {
+      return d.slug == slug && isSlug(slug)
+        && d.status in ['published', 'draft']
+        && str(d.url, 9, 2048) && d.url.matches('^https://.*')
+        && d.name is map && d.summary is map;
+    }
+    match /projects/{slug} {
+      allow read: if isAdmin() || resource.data.status == 'published';
+      allow create: if isAdmin() && validProject(request.resource.data, slug);
+      allow update: if isAdmin() && validProject(request.resource.data, slug) && request.resource.data.slug == resource.data.slug;
+      allow delete: if isAdmin();
+    }
+
+    /* ───── blog ───── */
+    function validPost(d) {
+      return isSlug(d.slug)
+        && d.status in ['draft', 'published']
+        && (d.status == 'draft' || d.publishedAt is timestamp)
+        && d.title is map && d.excerpt is map && d.content is map
+        && d.schemaVersion is int
+        && d.views is int && d.views >= 0;
+    }
+    // A visitor may bump the view counter of a published post by exactly 1 — and change nothing else.
+    function isViewBump() {
+      return resource.data.status == 'published'
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views'])
+        && request.resource.data.views == resource.data.views + 1;
+    }
+    match /blogPosts/{postId} {
+      allow read: if isAdmin() || resource.data.status == 'published';
+      allow create: if isAdmin() && validPost(request.resource.data);
+      allow update: if isAdmin() && validPost(request.resource.data) || isViewBump();
+      allow delete: if isAdmin();
+
+      match /revisions/{revId} {
+        allow read, create, delete: if isAdmin();
+        allow update: if false;
+      }
+    }
+    match /blogCategories/{slug} {
+      allow read: if true;
+      allow create, update: if isAdmin() && request.resource.data.slug == slug && isSlug(slug) && request.resource.data.name is map;
+      allow delete: if isAdmin();
+    }
+    match /blogTags/{slug} {
+      allow read: if true;
+      allow create, update: if isAdmin() && request.resource.data.slug == slug && isSlug(slug) && request.resource.data.name is map;
+      allow delete: if isAdmin();
+    }
+
+    /* ───── media library metadata (the files themselves live in Storage) ───── */
+    match /media/{id} {
+      allow read, write: if isAdmin();
+    }
+
+    /* ───── contact form: anyone may create one well-formed message; only admins can read or manage them ───── */
+    function validContact(d) {
+      return d.keys().hasOnly(['name', 'email', 'subject', 'message', 'locale', 'read', 'createdAt'])
+        && d.keys().hasAll(['name', 'email', 'subject', 'message', 'locale', 'read', 'createdAt'])
+        && str(d.name, 2, 80)
+        && str(d.email, 5, 200) && d.email.matches('^[^@\\s]+@[^@\\s]+\\.[^@\\s]{2,}$')
+        && str(d.subject, 3, 120)
+        && str(d.message, 10, 4000)
+        && d.locale in ['bn', 'en']
+        && d.read == false
+        && d.createdAt == request.time;
+    }
+    match /contactMessages/{id} {
+      allow create: if validContact(request.resource.data);
+      allow read, delete: if isAdmin();
+      allow update: if isAdmin() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
+    }
+
+    /* ───── audit trail: append-only ───── */
+    match /activityLogs/{id} {
+      allow read: if isAdmin();
+      allow create: if isAdmin() && request.resource.data.actorId == request.auth.uid && request.resource.data.createdAt == request.time;
+      allow update, delete: if false;
+    }
+  }
+}

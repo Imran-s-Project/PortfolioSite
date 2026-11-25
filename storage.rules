@@ -1,0 +1,27 @@
+rules_version = '2';
+
+// Images are public to read (they are embedded in articles); only admins can upload, replace or delete them.
+// Uploads are limited to 5 MB and to raster image types — SVG and HTML are refused on purpose (script injection risk).
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isAdmin() {
+      return request.auth != null
+        && firestore.exists(/databases/(default)/documents/adminProfiles/$(request.auth.uid))
+        && firestore.get(/databases/(default)/documents/adminProfiles/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    match /media/{year}/{month}/{file} {
+      allow get: if true;
+      allow list: if isAdmin();
+      allow create: if isAdmin()
+        && request.resource.size > 0
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/(jpeg|png|webp|avif|gif)');
+      allow update, delete: if isAdmin();
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

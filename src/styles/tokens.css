@@ -1,0 +1,130 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Design tokens — one place that defines the whole look of the site.
+   Every component reads only these custom properties, so switching
+   <html data-theme="…"> re-skins header, hero, cards, blog, admin, overlays …
+   Themes: obsidian · aurora · arctic · terminal · ember
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* type */
+  --font-display: var(--font-sora), var(--font-bn), system-ui, sans-serif;
+  --font-body: var(--font-bn), var(--font-sora), system-ui, sans-serif;
+  --font-code: var(--font-mono), ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --fs-0: clamp(0.8125rem, 0.79rem + 0.1vw, 0.875rem);
+  --fs-1: clamp(0.95rem, 0.92rem + 0.15vw, 1.0625rem);
+  --fs-2: clamp(1.125rem, 1.06rem + 0.3vw, 1.3125rem);
+  --fs-3: clamp(1.375rem, 1.2rem + 0.8vw, 1.875rem);
+  --fs-4: clamp(1.75rem, 1.4rem + 1.6vw, 2.75rem);
+  --fs-5: clamp(2.5rem, 1.6rem + 4.2vw, 5.25rem);
+  --lh-body: 1.7;
+  --lh-tight: 1.12;
+
+  /* space, radius, layout */
+  --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem; --space-4: 1rem; --space-5: 1.5rem;
+  --space-6: 2rem; --space-7: 3rem; --space-8: 4.5rem; --space-9: 7rem;
+  --radius-s: 8px; --radius-m: 14px; --radius-l: 22px; --radius-pill: 999px;
+  --container: 74rem; --container-narrow: 46rem; --gutter: clamp(1rem, 4vw, 2.5rem);
+  --header-h: 4.75rem; --header-h-compact: 3.5rem;
+
+  /* motion */
+  --ease: cubic-bezier(0.22, 0.8, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-1: 140ms; --dur-2: 240ms; --dur-3: 420ms;
+
+  /* z-index scale */
+  --z-header: 60; --z-progress: 70; --z-popover: 80; --z-modal: 90; --z-intro: 100; --z-toast: 110;
+
+  /* semantic status colours (theme overrides keep AA contrast) */
+  --success: #34d399; --warning: #fbbf24; --danger: #f87171; --info: #60a5fa;
+}
+
+/* ───────── 01 · Obsidian Circuit — charcoal, electric cyan, teal ───────── */
+:root[data-theme='obsidian'] {
+  color-scheme: dark;
+  --bg: #07090b; --bg-2: #0b1013; --surface: #0f1519; --surface-2: #151d22; --surface-3: #1c262c;
+  --glass: rgba(11, 16, 19, 0.74); --glass-strong: rgba(9, 13, 16, 0.9);
+  --text: #e6eef2; --text-dim: #9db0ba; --text-faint: #7d919c;
+  --accent: #22d3ee; --accent-2: #14b8a6; --accent-ink: #031316; --accent-soft: rgba(34, 211, 238, 0.12);
+  --border: rgba(34, 211, 238, 0.16); --border-strong: rgba(34, 211, 238, 0.42);
+  --ring: #67e8f9; --glow: 0 0 0 1px rgba(34, 211, 238, 0.35), 0 0 28px rgba(34, 211, 238, 0.22);
+  --shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 10px 30px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 24px 70px rgba(0, 0, 0, 0.6);
+  --gradient: linear-gradient(135deg, #22d3ee 0%, #14b8a6 100%);
+  --gradient-edge: linear-gradient(90deg, transparent, #22d3ee, #14b8a6, transparent);
+  --veil-rgb: 3, 9, 12; --veil-boost: 1; --theme-color: #07090b;
+  --heading-font: var(--font-display); --heading-weight: 650; --heading-tracking: -0.025em;
+  --success: #34d399; --warning: #fbbf24; --danger: #fb7185; --info: #67e8f9;
+}
+
+/* ───────── 02 · Aurora Matrix — midnight, violet, blue ───────── */
+:root[data-theme='aurora'] {
+  color-scheme: dark;
+  --bg: #090a1c; --bg-2: #0e1030; --surface: #121438; --surface-2: #1a1d46; --surface-3: #232757;
+  --glass: rgba(14, 16, 48, 0.72); --glass-strong: rgba(10, 11, 34, 0.9);
+  --text: #ecebff; --text-dim: #aeb1e0; --text-faint: #8b8fc6;
+  --accent: #a78bfa; --accent-2: #60a5fa; --accent-ink: #120a30; --accent-soft: rgba(167, 139, 250, 0.14);
+  --border: rgba(167, 139, 250, 0.2); --border-strong: rgba(167, 139, 250, 0.5);
+  --ring: #c4b5fd; --glow: 0 0 0 1px rgba(167, 139, 250, 0.4), 0 0 34px rgba(96, 165, 250, 0.24);
+  --shadow: 0 1px 0 rgba(255, 255, 255, 0.05) inset, 0 12px 34px rgba(4, 4, 24, 0.55);
+  --shadow-lg: 0 26px 80px rgba(4, 4, 30, 0.7);
+  --gradient: linear-gradient(120deg, #8b5cf6 0%, #3b82f6 55%, #06b6d4 100%);
+  --gradient-edge: linear-gradient(90deg, transparent, #a78bfa, #60a5fa, #22d3ee, transparent);
+  --veil-rgb: 8, 8, 30; --veil-boost: 1; --theme-color: #090a1c;
+  --heading-font: var(--font-display); --heading-weight: 600; --heading-tracking: -0.02em;
+  --success: #6ee7b7; --warning: #fcd34d; --danger: #fda4af; --info: #93c5fd;
+}
+
+/* ───────── 03 · Arctic Studio — light, graphite, electric blue ───────── */
+:root[data-theme='arctic'] {
+  color-scheme: light;
+  --bg: #f3f6fa; --bg-2: #eaf0f7; --surface: #ffffff; --surface-2: #f6f9fc; --surface-3: #e8eef5;
+  --glass: rgba(255, 255, 255, 0.82); --glass-strong: rgba(255, 255, 255, 0.95);
+  --text: #0f1722; --text-dim: #3f4e61; --text-faint: #5d6c80;
+  --accent: #2563eb; --accent-2: #0891b2; --accent-ink: #ffffff; --accent-soft: rgba(37, 99, 235, 0.09);
+  --border: #d6dfeb; --border-strong: rgba(37, 99, 235, 0.5);
+  --ring: #1d4ed8; --glow: 0 0 0 1px rgba(37, 99, 235, 0.3), 0 8px 26px rgba(37, 99, 235, 0.18);
+  --shadow: 0 1px 2px rgba(15, 23, 34, 0.06), 0 8px 24px rgba(15, 23, 34, 0.07);
+  --shadow-lg: 0 20px 60px rgba(15, 23, 34, 0.14);
+  --gradient: linear-gradient(135deg, #2563eb 0%, #0891b2 100%);
+  --gradient-edge: linear-gradient(90deg, transparent, #2563eb, #0891b2, transparent);
+  --veil-rgb: 244, 247, 251; --veil-boost: 1.9; --theme-color: #f3f6fa;
+  --heading-font: var(--font-display); --heading-weight: 600; --heading-tracking: -0.03em;
+  --success: #047857; --warning: #b45309; --danger: #b91c1c; --info: #1d4ed8;
+}
+
+/* ───────── 04 · Terminal Forge — graphite, acid lime, green ───────── */
+:root[data-theme='terminal'] {
+  color-scheme: dark;
+  --bg: #0b0e0c; --bg-2: #0f130f; --surface: #131813; --surface-2: #1a211a; --surface-3: #232c23;
+  --glass: rgba(15, 19, 15, 0.78); --glass-strong: rgba(11, 14, 12, 0.92);
+  --text: #e0e9dc; --text-dim: #9bab96; --text-faint: #7d8e79;
+  --accent: #a3e635; --accent-2: #22c55e; --accent-ink: #0b0e0c; --accent-soft: rgba(163, 230, 53, 0.1);
+  --border: rgba(163, 230, 53, 0.17); --border-strong: rgba(163, 230, 53, 0.5);
+  --ring: #bef264; --glow: 0 0 0 1px rgba(163, 230, 53, 0.4), 0 0 24px rgba(163, 230, 53, 0.16);
+  --shadow: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 10px 28px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 22px 64px rgba(0, 0, 0, 0.65);
+  --gradient: linear-gradient(135deg, #a3e635 0%, #22c55e 100%);
+  --gradient-edge: linear-gradient(90deg, transparent, #a3e635, #22c55e, transparent);
+  --veil-rgb: 5, 10, 6; --veil-boost: 1; --theme-color: #0b0e0c;
+  --heading-font: var(--font-code); --heading-weight: 600; --heading-tracking: -0.04em;
+  --radius-s: 4px; --radius-m: 8px; --radius-l: 12px;
+  --success: #4ade80; --warning: #facc15; --danger: #fb7185; --info: #7dd3fc;
+}
+
+/* ───────── 05 · Ember Creative — warm dark, amber, copper ───────── */
+:root[data-theme='ember'] {
+  color-scheme: dark;
+  --bg: #120c08; --bg-2: #1a110b; --surface: #20150e; --surface-2: #2a1b11; --surface-3: #372417;
+  --glass: rgba(26, 17, 11, 0.74); --glass-strong: rgba(18, 12, 8, 0.92);
+  --text: #f6ece3; --text-dim: #d1b9a4; --text-faint: #a08670;
+  --accent: #f59e0b; --accent-2: #ea580c; --accent-ink: #1a0f05; --accent-soft: rgba(245, 158, 11, 0.12);
+  --border: rgba(245, 158, 11, 0.2); --border-strong: rgba(245, 158, 11, 0.5);
+  --ring: #fbbf24; --glow: 0 0 0 1px rgba(245, 158, 11, 0.38), 0 0 34px rgba(234, 88, 12, 0.24);
+  --shadow: 0 1px 0 rgba(255, 240, 220, 0.05) inset, 0 12px 34px rgba(8, 3, 0, 0.55);
+  --shadow-lg: 0 26px 76px rgba(8, 3, 0, 0.7);
+  --gradient: linear-gradient(135deg, #fbbf24 0%, #f59e0b 35%, #ea580c 100%);
+  --gradient-edge: linear-gradient(90deg, transparent, #fbbf24, #ea580c, transparent);
+  --veil-rgb: 14, 8, 4; --veil-boost: 1; --theme-color: #120c08;
+  --heading-font: var(--font-display); --heading-weight: 600; --heading-tracking: -0.02em;
+  --success: #86efac; --warning: #fcd34d; --danger: #fca5a5; --info: #fdba74;
+}

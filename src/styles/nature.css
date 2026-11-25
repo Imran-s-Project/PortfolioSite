@@ -1,0 +1,42 @@
+/* Cinematic nature engine layers.  back → front:  #scenes (fixed) › .scene ×6 (cross-faded by scroll) › .atmos (mist · light · grain) › .veil (readability) › the page */
+#scenes { position: fixed; inset: 0; z-index: -2; overflow: hidden; isolation: isolate; background: var(--bg); }
+.scene { position: absolute; inset: 0; visibility: hidden; overflow: hidden; pointer-events: none; background: var(--tint, var(--bg)); }
+.scene.is-active { visibility: visible; will-change: opacity; }
+.scene__stage { position: absolute; inset: -5%; transform-origin: 50% 58%; }
+.scene.is-active .scene__stage { will-change: transform; }
+/* every layer carries a --depth; --px/--py (pointer) and --sy (scroll) are published by the engine */
+.scene__layer { position: absolute; inset: 0; transform: translate3d(calc(var(--px, 0) * var(--depth, 0) * -30px), calc(var(--py, 0) * var(--depth, 0) * -18px + var(--sy, 0) * var(--depth, 0) * -36px), 0); }
+.scene__fallback { position: absolute; inset: 0; }
+.scene__poster, .scene__video, .scene__layer--extra { opacity: 0; transition: opacity 1.2s ease; }
+.scene__poster, .scene__video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+.scene__layer--extra { width: 100%; height: 100%; object-fit: cover; object-position: 50% 100%; }
+.scene__poster.is-loaded, .scene__video.is-live, .scene__layer--extra.is-loaded { opacity: 1; }
+
+.atmos { position: absolute; inset: 0; z-index: 50; overflow: hidden; pointer-events: none; }
+.atmos__gl { position: absolute; inset: 0; width: 100%; height: 100%; }
+.atmos__mist { display: none; position: absolute; inset: -12%; }
+.atmos[data-mist='css'] .atmos__mist, .atmos[data-mist='none'] .atmos__mist { display: block; }
+.atmos__mist i { position: absolute; inset: 0; background: radial-gradient(55% 38% at 28% 72%, rgba(var(--mist, 223, 238, 221), calc(var(--mist-a, 0.8) * 0.3)), transparent 72%), radial-gradient(48% 34% at 76% 58%, rgba(var(--mist, 223, 238, 221), calc(var(--mist-a, 0.8) * 0.22)), transparent 72%); animation: mist-a 80s ease-in-out infinite alternate; }
+.atmos__mist i + i { background: radial-gradient(60% 36% at 62% 84%, rgba(var(--mist, 223, 238, 221), calc(var(--mist-a, 0.8) * 0.26)), transparent 72%), radial-gradient(44% 30% at 18% 52%, rgba(var(--mist, 223, 238, 221), calc(var(--mist-a, 0.8) * 0.18)), transparent 72%); animation: mist-b 110s ease-in-out infinite alternate; }
+.atmos__light { position: absolute; inset: 0; opacity: 0; transition: opacity 0.8s ease; background: radial-gradient(560px circle at var(--lx, 50%) var(--ly, 40%), color-mix(in srgb, var(--accent) 16%, transparent), transparent 62%); }
+.atmos.has-pointer .atmos__light { opacity: 1; }
+/* fine film grain: also dithers the dark gradients so they never band */
+.atmos__grain { position: absolute; inset: -80px; opacity: 0.06; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); background-size: 200px 200px; animation: grain 1.1s steps(5) infinite; }
+:root[data-theme='arctic'] .atmos__grain { opacity: 0.03; }
+#scenes[data-motion='off'] .atmos__mist i, #scenes[data-motion='off'] .atmos__grain, .atmos[data-mist='none'] .atmos__mist i { animation: none; }
+@keyframes mist-a { from { transform: translate3d(-4%, 0, 0); } to { transform: translate3d(5%, -2%, 0); } }
+@keyframes mist-b { from { transform: translate3d(4%, 1%, 0); } to { transform: translate3d(-5%, -1%, 0); } }
+@keyframes grain { 0% { transform: translate(0, 0); } 25% { transform: translate(-30px, 20px); } 50% { transform: translate(20px, -30px); } 75% { transform: translate(-10px, -20px); } 100% { transform: translate(30px, 10px); } }
+
+/* readability veil — strength is blended per scene by the engine (--veil-t / -m / -b); colour and boost come from the theme,
+   so a dark theme gets a deep veil and the light Arctic theme a pale one that keeps graphite text readable over footage */
+.veil {
+  position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(130% 95% at 50% 42%, transparent 45%, rgba(var(--veil-rgb), calc(0.5 * var(--veil-boost, 1))) 100%),
+    linear-gradient(180deg, rgba(var(--veil-rgb), calc(var(--veil-t, 0.4) * var(--veil-boost, 1))), rgba(var(--veil-rgb), calc(var(--veil-m, 0.55) * var(--veil-boost, 1))) 52%, rgba(var(--veil-rgb), calc(var(--veil-b, 0.75) * var(--veil-boost, 1))));
+}
+@media (prefers-reduced-motion: reduce) {
+  .scene__stage { transform: none !important; }
+  .scene__poster, .scene__video { transition: opacity 0.4s ease; }
+}

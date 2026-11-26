@@ -33,6 +33,7 @@ export function UploadZone({ onUploaded, multiple = true }: { onUploaded: (item:
           reason === 'type' ? L('Only JPEG, PNG, WebP, AVIF or GIF images are allowed (SVG is refused for safety).', 'শুধু JPEG, PNG, WebP, AVIF বা GIF ছবি চলবে (নিরাপত্তার জন্য SVG নেওয়া হয় না)।')
           : reason === 'size' ? `${L('The image must be smaller than', 'ছবি অবশ্যই ছোট হতে হবে')} ${formatBytes(MAX_IMAGE_BYTES)}.`
           : reason === 'empty' ? L('The file is empty.', 'ফাইলটি খালি।')
+          : reason === 'config' ? L('Image hosting (ImgBB) is not set up yet — the site owner needs to add IMGBB_API_KEY on the server.', 'ছবি হোস্টিং (ImgBB) এখনো চালু করা হয়নি — সাইটের মালিককে সার্ভারে IMGBB_API_KEY যোগ করতে হবে।')
           : L('Upload failed. Check your connection and permissions.', 'আপলোড ব্যর্থ। সংযোগ ও অনুমতি দেখুন।')
         );
       }

@@ -44,7 +44,7 @@ export default function MediaPage() {
   const remove = async () => {
     if (!open) return;
     close();
-    if (!(await confirm({ title: L('Delete this image?', 'ছবিটি মুছবেন?'), body: L('It is removed from storage. Articles that still use it will show a broken image.', 'এটি স্টোরেজ থেকে মুছে যাবে। যেসব লেখায় এটি আছে সেখানে ছবি ভাঙা দেখাবে।'), confirmLabel: L('Delete', 'মুছুন'), danger: true }))) return;
+    if (!(await confirm({ title: L('Delete this image?', 'ছবিটি মুছবেন?'), body: L('It is removed from this library but stays on ImgBB, so articles that still use it keep working. To erase it completely, delete it in your ImgBB account.', 'এটি এই লাইব্রেরি থেকে মুছে যাবে, কিন্তু ImgBB-তে থেকে যাবে — তাই যেসব লেখায় এটি আছে সেখানে ছবি আগের মতোই দেখাবে। পুরোপুরি মুছতে আপনার ImgBB অ্যাকাউন্ট থেকে মুছে ফেলুন।'), confirmLabel: L('Delete', 'মুছুন'), danger: true }))) return;
     try {
       await deleteMedia(open);
       update((cur) => cur.filter((x) => x.id !== open.id));
@@ -66,7 +66,7 @@ export default function MediaPage() {
 
   return (
     <>
-      <PageHead title={L('Media library', 'মিডিয়া লাইব্রেরি')} sub={L('Images are validated (type and size), stored in Firebase Storage and recorded here.', 'ছবি যাচাই (ধরন ও আকার) হয়ে ফায়ারবেস স্টোরেজে জমা হয় এবং এখানে নথিভুক্ত হয়।')} />
+      <PageHead title={L('Media library', 'মিডিয়া লাইব্রেরি')} sub={L('Images are validated (type and size), stored on ImgBB and recorded here.', 'ছবি যাচাই (ধরন ও আকার) হয়ে ImgBB-তে জমা হয় এবং এখানে নথিভুক্ত হয়।')} />
       <UploadZone onUploaded={(m) => update((cur) => [m, ...cur])} />
       {failed ? <ErrorState text={L('Could not load media.', 'মিডিয়া লোড করা যায়নি।')} onRetry={reload} /> : items === null ? <TableSkeleton rows={3} /> : items.length === 0 ? <EmptyState title={L('No images yet', 'এখনো কোনো ছবি নেই')} text={L('Upload your first image above.', 'উপরে প্রথম ছবিটি আপলোড করুন।')} /> : (
         <ul className="media-grid">

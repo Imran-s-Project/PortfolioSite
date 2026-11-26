@@ -130,6 +130,8 @@ export interface MediaItem {
   alt: Localized;
   uploadedBy: string;
   createdAt: string;
+  /** ImgBB's own "delete this image" link (images uploaded to ImgBB only). Admin-only: /media is readable by administrators alone. */
+  deleteUrl?: string;
 }
 export interface ContactMessage {
   id: string;

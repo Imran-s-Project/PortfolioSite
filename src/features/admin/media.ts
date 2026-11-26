@@ -1,12 +1,12 @@
 import { addDoc, collection, deleteDoc, doc, getDocs, limit, orderBy, query, serverTimestamp, updateDoc } from 'firebase/firestore';
-import { deleteObject, getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
-import { getDb, getStorageClient } from '@/lib/firebase/client';
+import { getAuthClient, getDb } from '@/lib/firebase/client';
 import type { Localized, MediaItem } from '@/types';
 import { plainDoc } from './data';
-import { mediaPath, validateImage, type UploadError } from './media-utils';
+import { hostImage, ImgbbError, type ImgbbImage } from './imgbb';
+import { validateImage, type UploadError } from './media-utils';
 
 export class UploadFailure extends Error {
-  constructor(public reason: UploadError | 'failed') {
+  constructor(public reason: UploadError | 'failed' | 'config') {
     super(reason);
   }
 }
@@ -22,24 +22,36 @@ async function imageSize(file: File): Promise<{ width: number; height: number } 
   }
 }
 
-/** Validates, uploads to Storage (with progress), then records the file in /media. Throws UploadFailure. */
+const idToken = async (): Promise<string | null> => (await getAuthClient().currentUser?.getIdToken()) ?? null;
+
+/** Validates, uploads to ImgBB (with progress), then records the image in /media. Throws UploadFailure. */
 export async function uploadImage(file: File, uid: string, onProgress?: (fraction: number) => void): Promise<MediaItem> {
   const bad = validateImage(file);
   if (bad) throw new UploadFailure(bad);
-  const path = mediaPath(file);
-  const task = uploadBytesResumable(ref(getStorageClient(), path), file, { contentType: file.type, cacheControl: 'public, max-age=31536000, immutable' });
-  await new Promise<void>((resolve, reject) => {
-    task.on('state_changed', (s) => onProgress?.(s.bytesTransferred / s.totalBytes), () => reject(new UploadFailure('failed')), () => resolve());
-  });
-  const url = await getDownloadURL(task.snapshot.ref);
-  const size = await imageSize(file);
-  const meta = { path, url, name: file.name.slice(0, 120), size: file.size, contentType: file.type, alt: { bn: '', en: '' }, uploadedBy: uid, ...(size ?? {}) };
+  let image: ImgbbImage;
+  try {
+    image = await hostImage(file, idToken, onProgress);
+  } catch (err) {
+    throw new UploadFailure(err instanceof ImgbbError ? err.reason : 'failed');
+  }
+  // ImgBB reports the dimensions itself; decoding the file here is only the fallback.
+  const size = image.width && image.height ? { width: image.width, height: image.height } : await imageSize(file);
+  const meta = {
+    path: `imgbb/${image.id}`,
+    url: image.url,
+    name: file.name.slice(0, 120),
+    size: file.size,
+    contentType: file.type,
+    alt: { bn: '', en: '' },
+    uploadedBy: uid,
+    ...(size ?? {}),
+    ...(image.deleteUrl ? { deleteUrl: image.deleteUrl } : {})
+  };
   let docRef;
   try {
     docRef = await addDoc(collection(getDb(), 'media'), { ...meta, createdAt: serverTimestamp() });
   } catch {
-    // an uploaded file with no record would sit in Storage, unlisted and unremovable from Admin — take it back out
-    await deleteObject(task.snapshot.ref).catch(() => undefined);
+    // ImgBB's free API cannot take the file back, so it stays there unlisted; uploading again is safe.
     throw new UploadFailure('failed');
   }
   return { id: docRef.id, createdAt: new Date().toISOString(), ...meta };
@@ -52,11 +64,7 @@ export async function listMedia(max = 120): Promise<MediaItem[]> {
 export async function updateMediaAlt(id: string, alt: Localized): Promise<void> {
   await updateDoc(doc(getDb(), 'media', id), { alt });
 }
+/** Removes the image from the library. ImgBB's free API has no delete call, so the file itself stays on ImgBB (README → Images). */
 export async function deleteMedia(item: MediaItem): Promise<void> {
-  // A file that is already gone is fine. Any other failure (no permission, offline) stops here: deleting the record anyway would
-  // leave the file in Storage, still public, and no longer listed anywhere.
-  await deleteObject(ref(getStorageClient(), item.path)).catch((err: { code?: string }) => {
-    if (err?.code !== 'storage/object-not-found') throw err;
-  });
   await deleteDoc(doc(getDb(), 'media', item.id));
 }

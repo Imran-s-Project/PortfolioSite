@@ -7,7 +7,7 @@ Everything below is done **once**, by the site owner, in the Firebase console / 
 |---|---|---|
 | **Authentication** → Sign-in method | Email/Password (and Google if you want it) | Admin login |
 | **Firestore Database** | Production mode, region near you | Content, messages |
-| **Storage** | Production mode | Images |
+| *(optional)* **Storage** | Production mode | Only for images uploaded before the move to ImgBB. New images are hosted on ImgBB (README → Images) and need no Firebase service |
 | **App Check** | Register the web app with **reCAPTCHA v3**, copy the *site key* into `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` | Blocks scripts/bots from using your quota |
 | *(optional)* Analytics | already created | only used if `NEXT_PUBLIC_ENABLE_ANALYTICS=true` |
 
@@ -16,10 +16,10 @@ Authentication → Settings → **Authorized domains**: add your Vercel domain(s
 ## 2. Deploy the rules **and the indexes**
 ```bash
 npm i -g firebase-tools && firebase login
-firebase deploy --only firestore:rules,firestore:indexes,storage
+firebase deploy --only firestore:rules,firestore:indexes
 ```
-Files: `firestore.rules`, `storage.rules`, `firestore.indexes.json` (already pointing at project `imransiteinfo` via `.firebaserc`).
-> Storage rules read `/adminProfiles/{uid}` from Firestore. The first deploy may ask you to grant that cross-service access — answer **yes**.
+Files: `firestore.rules`, `firestore.indexes.json` (already pointing at project `imransiteinfo` via `.firebaserc`).
+> Still using the Storage bucket for older images? Add `,storage` to the command (`storage.rules` is kept for that). Those rules read `/adminProfiles/{uid}` from Firestore, so the first deploy may ask you to grant that cross-service access — answer **yes**.
 
 Deploying only the rules (for example by pasting them into the console) is **not enough**: the indexes are a separate deploy, and the blog needs them.
 

@@ -1,6 +1,6 @@
 # Imran Ahmed — portfolio & content platform
 
-Next.js 16 (App Router) · React 19 · TypeScript (strict) · Firebase (Auth, Firestore, Storage, App Check) · Vercel.
+Next.js 16 (App Router) · React 19 · TypeScript (strict) · Firebase (Auth, Firestore, App Check) · ImgBB (image hosting) · Vercel.
 A complete rebuild of the original vanilla-JS portfolio: same identity, same **ten projects**, same cinematic nature background — plus five full-site themes, a Bangla/English site, case-study pages, a block-based blog and a protected admin dashboard.
 
 > **Status.** `npm run check` (type-check + ESLint + 263 tests) passes and the production build compiles. [Verification](#verification) says exactly what was run, how, and what could not be run in the sandbox where the latest repair pass was done.
@@ -36,8 +36,16 @@ Copy `.env.example` to `.env.local` (never committed, never part of a ZIP) and f
 | `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` | App Check (reCAPTCHA v3) site key |
 | `NEXT_PUBLIC_APPCHECK_DEBUG_TOKEN` | Local development only |
 | `NEXT_PUBLIC_ENABLE_ANALYTICS`, `NEXT_PUBLIC_USE_EMULATORS` | Optional switches, both off by default |
+| `IMGBB_API_KEY` | **Server-only** (no `NEXT_PUBLIC_`). The free API key from [api.imgbb.com](https://api.imgbb.com/) that the Admin Panel's image uploads use. Set it in `.env.local` and on Vercel (Settings → Environment Variables), then redeploy |
 
-There are **no server-side secrets** in this app. Do not put a service-account file, private key or token into a variable that starts with `NEXT_PUBLIC_` — those are shipped to every browser.
+`IMGBB_API_KEY` is the only server-side secret in this app. Do not put it, a service-account file, a private key or any token into a variable that starts with `NEXT_PUBLIC_` — those are shipped to every browser.
+
+### Images (ImgBB)
+Images uploaded in the Admin Panel (media library, post covers, the editor, project screenshots) are hosted on ImgBB's free plan, not in Firebase Storage. Only the drag-and-drop zone's back end changed.
+* **Key handling:** `/api/imgbb-key` gives the key to a signed-in administrator only (the same check as `/api/revalidate`); the browser keeps it in memory and uploads the file straight to ImgBB. The file does not pass through this site's server because Vercel Functions refuse request bodies over 4.5 MB and the Admin Panel accepts up to 5 MB.
+* **Records:** each upload is still recorded in the `media` collection (url, size, dimensions, alt text …). `path` now holds `imgbb/<ImgBB id>` and `deleteUrl` holds ImgBB's delete link (readable by administrators only). No Firestore rules change is needed.
+* **Deleting:** ImgBB's free API has no delete call, so *Delete* in the media library removes the image from the library but the file stays on ImgBB (articles that still use it keep working). To erase it completely, delete it in your ImgBB account.
+* **Older images** stay where they are (Firebase Storage) and keep working: they are still listed, displayed and optimised. `storage.rules` is unchanged and only matters while that bucket is in use.
 
 ### Working from Codespaces and Termux
 * **Codespaces** is the place to run everything: open the repository, `npm install`, `npm run check`, `npm run dev` (port 3000 is forwarded), later `npm run build` and, with Java and the Firebase CLI, `npm run rules:test`.

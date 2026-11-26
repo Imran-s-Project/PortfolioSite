@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import { firebaseConfig } from '@/config/firebase';
-import { isBucketImage } from '@/lib/utils/images';
+import { isBucketImage, isImgbbImage } from '@/lib/utils/images';
 
 interface Props {
   src: string;
@@ -14,9 +14,9 @@ interface Props {
   height?: number;
 }
 
-/** Optimised <Image> for our own bucket; a plain lazy <img> for anything else, so an unexpected host can never break a page. */
+/** Optimised <Image> for ImgBB and our own (older) bucket; a plain lazy <img> for anything else, so an unexpected host can never break a page. */
 export function SmartImage({ src, alt, sizes, priority, className, fill, width, height }: Props) {
-  const own = isBucketImage(src, firebaseConfig.storageBucket);
+  const own = isImgbbImage(src) || isBucketImage(src, firebaseConfig.storageBucket);
   if (own && fill) return <Image src={src} alt={alt} fill sizes={sizes} priority={priority} className={className} />;
   if (own && width && height) return <Image src={src} alt={alt} width={width} height={height} sizes={sizes} priority={priority} className={className} />;
   /* eslint-disable-next-line @next/next/no-img-element */

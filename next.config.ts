@@ -16,8 +16,11 @@ const config: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   images: {
-    // Only images from THIS project's Firebase Storage bucket may be optimised.
-    remotePatterns: [{ protocol: 'https', hostname: 'firebasestorage.googleapis.com', pathname: `/v0/b/${bucket}/o/**` }]
+    // Only images from ImgBB (current uploads) and THIS project's Firebase Storage bucket (older uploads) may be optimised.
+    remotePatterns: [
+      { protocol: 'https', hostname: 'i.ibb.co', pathname: '/**' },
+      { protocol: 'https', hostname: 'firebasestorage.googleapis.com', pathname: `/v0/b/${bucket}/o/**` }
+    ]
   },
   async headers() {
     return [

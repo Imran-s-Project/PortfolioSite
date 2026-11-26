@@ -2,7 +2,7 @@ import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 import { applyFormat } from '@/features/editor/format';
 import { cleanContent, emptyPost, fromLocalInput, problems, suggestSlug, toLocalInput, unzipLines, zipLines } from '@/features/editor/model';
-import { mediaPath, validateImage } from '@/features/admin/media-utils';
+import { imageName, validateImage } from '@/features/admin/media-utils';
 import { parseInline, stripInline } from '@/lib/utils/inline';
 import { createBlock } from '@/lib/utils/blocks';
 import type { Block } from '@/types';
@@ -72,17 +72,19 @@ describe('editor model', () => {
 });
 
 describe('uploads', () => {
-  test('validation mirrors the storage rules', () => {
+  test('validation allows raster images under 5 MB only', () => {
     assert.equal(validateImage({ type: 'image/png', size: 1000 }), null);
     assert.equal(validateImage({ type: 'image/svg+xml', size: 1000 }), 'type');
     assert.equal(validateImage({ type: 'text/html', size: 10 }), 'type');
     assert.equal(validateImage({ type: 'image/png', size: 5 * 1024 * 1024 }), 'size');
     assert.equal(validateImage({ type: 'image/png', size: 0 }), 'empty');
   });
-  test('storage path has exactly the 4-segment shape the rules require', () => {
-    const p = mediaPath({ name: 'My Photo (1).JPG', type: 'image/jpeg' }, new Date(Date.UTC(2026, 10, 16)));
-    assert.match(p, /^media\/2026\/11\/[a-z0-9]+-my-photo-1\.jpg$/);
-    assert.equal(p.split('/').length, 4);
-    assert.match(mediaPath({ name: 'ছবি.png', type: 'image/png' }), /-image\.png$/);
+  test('the name sent to ImgBB is a safe ASCII slug without the extension', () => {
+    assert.equal(imageName({ name: 'My Photo (1).JPG' }), 'my-photo-1');
+    assert.equal(imageName({ name: 'ছবি.png' }), 'image');
+    assert.equal(imageName({ name: 'no-extension' }), 'no-extension');
+    assert.equal(imageName({ name: '.png' }), 'image');
+    const long = imageName({ name: `${'a'.repeat(39)} b.png` });
+    assert.ok(long.length <= 40 && !long.endsWith('-'));
   });
 });

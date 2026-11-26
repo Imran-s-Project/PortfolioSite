@@ -1,18 +1,17 @@
 /**
- * Browser-side Firebase (Auth, Firestore, Storage, App Check). Only ever imported by client components.
+ * Browser-side Firebase (Auth, Firestore, App Check). Only ever imported by client components.
+ * Images are not stored in Firebase: uploads go to ImgBB (src/features/admin/imgbb.ts).
  * App Check starts together with the app, before any other service is touched, so every request carries a token.
  */
 import { getApps, initializeApp, type FirebaseApp } from 'firebase/app';
 import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check';
 import { connectAuthEmulator, getAuth, type Auth } from 'firebase/auth';
 import { connectFirestoreEmulator, getFirestore, type Firestore } from 'firebase/firestore';
-import { connectStorageEmulator, getStorage, type FirebaseStorage } from 'firebase/storage';
 import { appCheckDebugToken, appCheckSiteKey, firebaseConfig, useEmulators } from '@/config/firebase';
 
 let app: FirebaseApp | undefined;
 let db: Firestore | undefined;
 let auth: Auth | undefined;
-let storage: FirebaseStorage | undefined;
 
 function startAppCheck(a: FirebaseApp): void {
   if (typeof window === 'undefined') return;
@@ -61,18 +60,4 @@ export function getAuthClient(): Auth {
     }
   }
   return auth;
-}
-
-export function getStorageClient(): FirebaseStorage {
-  if (!storage) {
-    storage = getStorage(getFirebaseApp());
-    if (useEmulators) {
-      try {
-        connectStorageEmulator(storage, '127.0.0.1', 9199);
-      } catch {
-        /* already connected */
-      }
-    }
-  }
-  return storage;
 }
